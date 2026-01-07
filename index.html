@@ -1,1 +1,647 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix Clone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #141414;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* ========== HEADER / NAVBAR ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 10%, rgba(0,0,0,0));
+            z-index: 100;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background-color: #141414;
+        }
+
+        .navbar-logo {
+            color: #E50914;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .navbar-menu a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .navbar-menu a:hover {
+            color: #b3b3b3;
+        }
+
+        /* ========== HERO BANNER ========== */
+        .hero {
+            position: relative;
+            height: 80vh;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), #141414),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080"><rect fill="%23333" width="1920" height="1080"/><text x="50%" y="50%" fill="%23666" font-size="48" text-anchor="middle" dy=".3em">COLOQUE A URL DA IMAGEM DE FUNDO AQUI</text></svg>');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            padding: 0 50px;
+        }
+
+        .hero-content {
+            max-width: 500px;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .hero-description {
+            font-size: 18px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-play {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .btn-play:hover {
+            background-color: rgba(255,255,255,0.8);
+        }
+
+        .btn-info {
+            background-color: rgba(109,109,110,0.7);
+            color: #fff;
+        }
+
+        .btn-info:hover {
+            background-color: rgba(109,109,110,0.5);
+        }
+
+        /* ========== MOVIE GRID ========== */
+        .movie-section {
+            padding: 40px 50px;
+            margin-top: -150px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px 0;
+        }
+
+        /* ========== MOVIE CARD ========== */
+        .movie-card {
+            min-width: 200px;
+            height: 300px;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            background-color: #2a2a2a;
+        }
+
+        .movie-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.8);
+            z-index: 20;
+        }
+
+        .movie-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .movie-card-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: #666;
+            font-size: 12px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* ========== MODAL / POPUP ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: #181818;
+            width: 90%;
+            max-width: 900px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #181818;
+            border: none;
+            color: #fff;
+            font-size: 28px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .modal-close:hover {
+            background-color: #E50914;
+        }
+
+        .modal-video-container {
+            width: 100%;
+            height: 500px;
+            background-color: #000;
+            position: relative;
+        }
+
+        .modal-video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .modal-info {
+            padding: 30px;
+        }
+
+        .modal-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .modal-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #46d369;
+        }
+
+        .modal-description {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #d2d2d2;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+
+            .hero {
+                height: 60vh;
+                padding: 0 20px;
+            }
+
+            .hero-title {
+                font-size: 32px;
+            }
+
+            .hero-description {
+                font-size: 14px;
+            }
+
+            .movie-section {
+                padding: 30px 20px;
+                margin-top: -100px;
+            }
+
+            .movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+
+            .movie-card {
+                height: 225px;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+
+            .modal-video-container {
+                height: 300px;
+            }
+
+            .modal-info {
+                padding: 20px;
+            }
+
+            .modal-title {
+                font-size: 24px;
+            }
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            padding: 50px;
+            color: #757575;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-logo">NETFLIX</div>
+        <ul class="navbar-menu">
+            <li><a href="#home">Início</a></li>
+            <li><a href="#series">Séries</a></li>
+            <li><a href="#filmes">Filmes</a></li>
+            <li><a href="#popular">Populares</a></li>
+            <li><a href="#mylist">Minha Lista</a></li>
+        </ul>
+    </nav>
+
+    <!-- ========== HERO BANNER ========== -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Título do Filme em Destaque</h1>
+            <p class="hero-description">
+                Aqui vai a descrição do filme em destaque. Uma breve sinopse que captura a atenção do usuário e o convida a assistir.
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-play" onclick="openModal('hero-movie')">▶ Assistir</button>
+                <button class="btn btn-info">ℹ Mais informações</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== MOVIE SECTIONS ========== -->
+    <div class="movie-section">
+        
+        <!-- 
+            ⭐ INSTRUÇÕES PARA ADICIONAR FILMES:
+            
+            1. CAPA DO FILME (img src):
+               - Substitua o "data:image/svg+xml..." por uma URL de imagem real
+               - Exemplo: <img src="https://exemplo.com/capa-filme.jpg" alt="Nome do Filme">
+               - A imagem será automaticamente redimensionada para 200x300px
+            
+            2. LINK DO FILME (onclick):
+               - Substitua "URL_DO_FILME_AQUI" pela URL do vídeo
+               - Pode ser: YouTube, Vimeo, arquivo MP4 direto, etc.
+               - Exemplo: onclick="openModal('Filme 1', 'https://www.youtube.com/embed/VIDEO_ID')"
+            
+            3. PARA YOUTUBE:
+               - Use o formato embed: https://www.youtube.com/embed/VIDEO_ID
+               - Exemplo real: https://www.youtube.com/embed/dQw4w9WgXcQ
+            
+            4. PARA ARQUIVO MP4:
+               - Use a URL direta: https://exemplo.com/filme.mp4
+        -->
+        
+        <div class="movie-grid">
+            <!-- Filme 1 -->
+            <div class="movie-card" onclick="openModal('Filme 1', 'https://www-fontedecanais-tv.71ngnc67ktik70.com/movies/304/305271.mp4?username=josiassalum-vods&token=C1EQAgcOWlBaW0ZEXFpbXUtYR04FAAEZBAoVD0lWUhkLGAMKCxkKAAUeSR0FDwtIR04dEhw0CQQWBA4PBBoLBRlJQkhZWUBRSEkIChYOHAUUBwxJUF1IRFhdXFEHBAQfHQQfMxkXRlFcXEhbX1QN')">
+                <img src="https://image.tmdb.org/t/p/w780/7aRfX7ukHp1il9kJQ1NTLokPt8Y.jpg" width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 1</text></svg>" alt="Filme 1">
+            </div>
+
+            <!-- Filme 2 -->
+            <div class="movie-card" onclick="openModal('Filme 2', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 2</text></svg>" alt="Filme 2">
+            </div>
+
+            <!-- Filme 3 -->
+            <div class="movie-card" onclick="openModal('Filme 3', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 3</text></svg>" alt="Filme 3">
+            </div>
+
+            <!-- Filme 4 -->
+            <div class="movie-card" onclick="openModal('Filme 4', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 4</text></svg>" alt="Filme 4">
+            </div>
+
+            <!-- Filme 5 -->
+            <div class="movie-card" onclick="openModal('Filme 5', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 5</text></svg>" alt="Filme 5">
+            </div>
+
+            <!-- Filme 6 -->
+            <div class="movie-card" onclick="openModal('Filme 6', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 6</text></svg>" alt="Filme 6">
+            </div>
+
+            <!-- Filme 7 -->
+            <div class="movie-card" onclick="openModal('Filme 7', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 7</text></svg>" alt="Filme 7">
+            </div>
+
+            <!-- Filme 8 -->
+            <div class="movie-card" onclick="openModal('Filme 8', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 8</text></svg>" alt="Filme 8">
+            </div>
+
+            <!-- Filme 9 -->
+            <div class="movie-card" onclick="openModal('Filme 9', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 9</text></svg>" alt="Filme 9">
+            </div>
+
+            <!-- Filme 10 -->
+            <div class="movie-card" onclick="openModal('Filme 10', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 10</text></svg>" alt="Filme 10">
+            </div>
+
+            <!-- Filme 11 -->
+            <div class="movie-card" onclick="openModal('Filme 11', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 11</text></svg>" alt="Filme 11">
+            </div>
+
+            <!-- Filme 12 -->
+            <div class="movie-card" onclick="openModal('Filme 12', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 12</text></svg>" alt="Filme 12">
+            </div>
+
+            <!-- Filme 13 -->
+            <div class="movie-card" onclick="openModal('Filme 13', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 13</text></svg>" alt="Filme 13">
+            </div>
+
+            <!-- Filme 14 -->
+            <div class="movie-card" onclick="openModal('Filme 14', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 14</text></svg>" alt="Filme 14">
+            </div>
+
+            <!-- Filme 15 -->
+            <div class="movie-card" onclick="openModal('Filme 15', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 15</text></svg>" alt="Filme 15">
+            </div>
+
+            <!-- Filme 16 -->
+            <div class="movie-card" onclick="openModal('Filme 16', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 16</text></svg>" alt="Filme 16">
+            </div>
+
+            <!-- Filme 17 -->
+            <div class="movie-card" onclick="openModal('Filme 17', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 17</text></svg>" alt="Filme 17">
+            </div>
+
+            <!-- Filme 18 -->
+            <div class="movie-card" onclick="openModal('Filme 18', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 18</text></svg>" alt="Filme 18">
+            </div>
+
+            <!-- Filme 19 -->
+            <div class="movie-card" onclick="openModal('Filme 19', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 19</text></svg>" alt="Filme 19">
+            </div>
+
+            <!-- Filme 20 -->
+            <div class="movie-card" onclick="openModal('Filme 20', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 20</text></svg>" alt="Filme 20">
+            </div>
+
+            <!-- Filme 21 -->
+            <div class="movie-card" onclick="openModal('Filme 21', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 21</text></svg>" alt="Filme 21">
+            </div>
+
+            <!-- Filme 22 -->
+            <div class="movie-card" onclick="openModal('Filme 22', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 22</text></svg>" alt="Filme 22">
+            </div>
+
+            <!-- Filme 23 -->
+            <div class="movie-card" onclick="openModal('Filme 23', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 23</text></svg>" alt="Filme 23">
+            </div>
+
+            <!-- Filme 24 -->
+            <div class="movie-card" onclick="openModal('Filme 24', 'URL_DO_FILME_AQUI')">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 24</text></svg>" alt="Filme 24">
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========== MODAL / POPUP ========== -->
+    <div class="modal" id="movieModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="modal-video-container" id="videoContainer">
+                <!-- O vídeo será carregado aqui dinamicamente -->
+            </div>
+            <div class="modal-info">
+                <h2 class="modal-title" id="modalTitle">Título do Filme</h2>
+                <div class="modal-meta">
+                    <span>99% relevante</span>
+                    <span>2024</span>
+                    <span>2h 15min</span>
+                </div>
+                <p class="modal-description">
+                    Esta é a descrição do filme que aparecerá no popup. Você pode adicionar informações sobre o enredo, elenco, e outros detalhes relevantes.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <p>Clone da Netflix - 2024 | Feito com HTML, CSS e JavaScript puro</p>
+    </footer>
+
+    <!-- ========== JAVASCRIPT ========== -->
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Função para abrir o modal com o filme
+        function openModal(movieTitle, movieUrl) {
+            const modal = document.getElementById('movieModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const videoContainer = document.getElementById('videoContainer');
+            
+            // Define o título
+            modalTitle.textContent = movieTitle;
+            
+            // Limpa o container de vídeo
+            videoContainer.innerHTML = '';
+            
+            // Verifica o tipo de URL e cria o player apropriado
+            if (movieUrl.includes('youtube.com') || movieUrl.includes('youtu.be')) {
+                // YouTube embed
+                const iframe = document.createElement('iframe');
+                iframe.src = movieUrl;
+                iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                iframe.allowFullscreen = true;
+                videoContainer.appendChild(iframe);
+            } else if (movieUrl.includes('vimeo.com')) {
+                // Vimeo embed
+                const iframe = document.createElement('iframe');
+                iframe.src = movieUrl;
+                iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+                iframe.allowFullscreen = true;
+                videoContainer.appendChild(iframe);
+            } else if (movieUrl.endsWith('.mp4') || movieUrl.endsWith('.webm') || movieUrl.endsWith('.ogg')) {
+                // Vídeo direto (MP4, WebM, Ogg)
+                const video = document.createElement('video');
+                video.controls = true;
+                video.autoplay = true;
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.src = movieUrl;
+                videoContainer.appendChild(video);
+            } else {
+                // Fallback para iframe genérico
+                const iframe = document.createElement('iframe');
+                iframe.src = movieUrl;
+                iframe.allowFullscreen = true;
+                videoContainer.appendChild(iframe);
+            }
+            
+            // Mostra o modal
+            modal.classList.add('active');
+            
+            // Previne scroll do body
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Função para fechar o modal
+        function closeModal() {
+            const modal = document.getElementById('movieModal');
+            const videoContainer = document.getElementById('videoContainer');
+            
+            // Remove o modal
+            modal.classList.remove('active');
+            
+            // Para o vídeo e limpa o container
+            videoContainer.innerHTML = '';
+            
+            // Restaura o scroll do body
+            document.body.style.overflow = 'auto';
+        }
+
+        // Fechar modal ao clicar fora do conteúdo
+        document.getElementById('movieModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Fechar modal com a tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Smooth scroll para links da navbar
+        document.querySelectorAll('.navbar-menu a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+
+</body>
+</html>
