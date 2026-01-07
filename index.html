@@ -64,15 +64,17 @@
         /* ========== HERO BANNER ========== */
         .hero {
             position: relative;
-            height: 80vh;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.3), #141414),
-                        url('data:image/svg+xml,<svg xmlns="https://github.com/leowalker201/SITE/blob/main/heretic.png>');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            padding: 0 50px;
-        }
+    height: 80vh;
+    /* O gradiente fica por cima (camada superior), a imagem por baixo */
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), #141414),
+                url('https://raw.githubusercontent.com/leowalker201/SITE/main/heretic.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    padding: 0 50px;
+}
 
         .hero-content {
             max-width: 500px;
@@ -477,8 +479,8 @@
             
 
             
-            <div class="movie-card" onclick="openModal('HEREGE (2024)', 'URL_DO_FILME_AQUI')">
-                <img src="https://m.media-amazon.com/images/M/MV5BNWI5ZmM1YWEtYjY0NS00ZDQwLWE4ZmQtZjUzZjNmMDBlYjIwXkEyXkFqcGc@._V1_.jpg" width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 3</text></svg>" alt="Filme 3">
+            <div class="movie-card" onclick="openModal('HEREGE (2024)', 'http://ban.dyn-alias.org:80/movie/FERNAND02026/678174667/1040372.mp4')">
+                <img src="https://image.tmdb.org/t/p/w780/j5e2YS1PRUVC1YgSool0JJyNLxJ.jpg" width='200' height='300'><rect fill='%23222' width='200' height='300'/><text x='50%' y='50%' fill='%23666' font-size='14' text-anchor='middle' dy='.3em'>CAPA 3</text></svg>" alt="Filme 3">
             </div>
 
           
